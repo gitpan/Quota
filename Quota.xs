@@ -695,7 +695,7 @@ getqcargtype()
 	strcpy(ret, "any");
 #else
 #ifdef Q_CTL_V2
-	strcpy(ret, "path");
+	strcpy(ret, "qfile");
 #else
 #ifdef IRIX_XFS
 	strcpy(ret, "dev,XFS");

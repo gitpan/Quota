@@ -1,14 +1,14 @@
-Quota/README  v1.2  November/98  TOMZO
+Quota/README  v1.2.2  December/98  TOMZO
 
 Quota extension module for Perl
 -------------------------------
 
 Author:   Tom Zoerner
-	  currently employed at Grundig TV Software Development, Germany
+	  currently employed at Grundig as TV Software Engineer
           best reached at: Tom.Zoerner@informatik.uni-erlangen.de
 
 Version:   1.2
-Date:      November 1998
+Date:      December 1998
 DSLI-code: Rdcf
            - stable release
 	   - support by developer

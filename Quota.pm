@@ -13,6 +13,7 @@ bootstrap Quota;
 
 use Carp;
 use POSIX qw(:errno_h);
+use strict;
 
 ##
 ##  Get block device for locally mounted file system
@@ -20,11 +21,12 @@ use POSIX qw(:errno_h);
 
 sub getdev {
   ($#_ > 0) && croak("Usage: Quota::getdev(path)");
-  my($dev) = (stat(($_[0] || ".")))[0];
+  my($target) = (($#_ == -1) ? "." : $_[0]);
+  my($dev) = (stat($target))[0];
   my($ret) = undef;
   my($fsname,$path);
  
-  if($dev && !Quota::setmntent()) {
+  if($dev && ($target ne "") && !Quota::setmntent()) {
     while(($fsname,$path) = Quota::getmntent()) {
       ($ret=$fsname, last) if ($dev == (stat($path))[0]);
     }
@@ -37,27 +39,28 @@ sub getdev {
 ##
 ##  Get "dev" argument for Quota-functions in this module
 ##  !! Not all operating systems require the same type of info as parameter
-##  !! for the quotactl call. i.e. SYS-V and SunOS wants the block device,
-##  !! Solaris the pathname of the quotas file on disk, OSF/1 any pathname
+##  !! for the quotactl call. E.g. SunOS wants the block device, but
+##  !! Solaris the pathname of the quotas file below the mount point
 ##
+
 sub getqcarg {
   ($#_ > 0) && croak("Usage: Quota::getqcarg(path)");
-  my($target) = ($_[0] || ".");
+  my($target) = (($#_ == -1) ? "." : $_[0]);
   my($dev) = (stat($target))[0];
   my($ret) = undef;
-  my($argtyp,$fsupp) = (getqcargtype() =~ /([^,]*),(.*)/);
+  my($argtyp,$fsupp) = (Quota::getqcargtype() =~ /([^,]*)(,.*)?/);
   my($fsname,$path,$fstyp);
 
-  if($dev && !Quota::setmntent()) {
+  if($dev && ($target ne "") && !Quota::setmntent()) {
     while(($fsname,$path,$fstyp) = Quota::getmntent()) {
       next if $fstyp =~ /^(lofs|ignore|auto.*)$/;
       if($dev == (stat($path))[0]) {
-	if($fsname !~ m#^/#) { $ret = $fsname }
-	elsif($argtyp eq "dev")  { $ret = $fsname }
-	elsif($argtyp eq "path") { $ret = "$path/quotas" }
-	elsif($argtyp eq "any")  { $ret = "$target" }
-	elsif($argtyp eq "dev") { $ret = "$fsname"; }
-	else { $ret = $path }  #($argtyp eq "mntpt")
+	if($fsname =~ m#^[^/]+:/#) { $ret = $fsname }   #NFS host:/path
+	elsif($argtyp eq "dev")    { $ret = $fsname }
+	elsif($argtyp eq "qfile")  { $ret = "$path/quotas" }
+	elsif($argtyp eq "any")    { $ret = $target }
+	else                       { $ret = $path }     #($argtyp eq "mntpt")
+
         # XFS and AFS quotas require separate access methods
         if   (($fstyp eq "xfs") && ($fsupp =~ /XFS/)) { $ret = "(XFS)$ret"; }
         elsif((($fstyp eq "afs") || ($fsname eq "AFS")) &&

@@ -21,9 +21,10 @@ other AFS implementations) and the Kerberos libraries. See 2c below.
 
 2)  Generate the hints file.
 
- a) Should be done by Makefile.PL for all supported systems. If not and
-    there is a file below hints/ for your operating system, just create
-    a link named "config.h" to that file:  ln -s hints/my-os.h config.h
+ a) Should be done by Makefile.PL for all supported systems. If not, and
+    there is a file below hints/ for your operating system (maybe for a
+    previous release), just create a link named "config.h" to that file:
+    ln -s hints/my-os.h config.h
 
  b) Else, use hints/none.h to create a config.h of your own. Check which
     #includes you need in the online manuals. Contact me before you invest
@@ -51,24 +52,22 @@ other AFS implementations) and the Kerberos libraries. See 2c below.
 
 3)  Generate the Makefile: perl Makefile.PL
 
-4a) If Perl is already compiled and installed:  "make install"
-    will compile the module, create the dynamic loadable library
-    and copy all the stuff at the correct places in your perl tree.
-
-    If you don't want to install immediately, type only "make"
-    and "make install" maybe later.
-
-4b) Else, Configure.sh will probably offer to install Quota automatically.
+4)  Compile the module: make
 
 5)  Run "make test" to check if the module routines do work correctly.
-    (Since release 1.0 you can test the module without installing.
-    Remove "use blib" if you want to test the installed version.)
+    (Since release 1.0 you can test the module without installing)
 
     contrib/ contains some additional examples, donated by users.
     No guarantee from me that they do anything useful or don't format
     your hard drive.
 
-6)  Before you start for another OS, type "make clean"
+6)  To install the module in your perl tree:  "make install"
+    You may need to su root before this step.
+
+7)  Before you start for another OS, type "make clean"
+
+Please mail me any changes in the hints files or Makefile.PL you had to
+apply to get the package to compile.
 
 Tom
 ---
