@@ -17,6 +17,10 @@ use strict;
 
 ##
 ##  Get block device for locally mounted file system
+##  !! Do not use this to get the argument for the quota-functions in this
+##  !! module, since not all operating systems use the device path for the
+##  !! quotactl system call and e.g. Solaris doesn't even use a system call
+##  !! Always use getqcarg() instead.
 ##
 
 sub getdev {
@@ -37,10 +41,7 @@ sub getdev {
 }
 
 ##
-##  Get "dev" argument for Quota-functions in this module
-##  !! Not all operating systems require the same type of info as parameter
-##  !! for the quotactl call. E.g. SunOS wants the block device, but
-##  !! Solaris the pathname of the quotas file below the mount point
+##  Get "device" argument for this module's Quota-functions
 ##
 
 sub getqcarg {
@@ -55,7 +56,7 @@ sub getqcarg {
     while(($fsname,$path,$fstyp) = Quota::getmntent()) {
       next if $fstyp =~ /^(lofs|ignore|auto.*)$/;
       if($dev == (stat($path))[0]) {
-	if($fsname =~ m#^[^/]+:/#) { $ret = $fsname }   #NFS host:/path
+	if($fsname =~ m|^[^/]+:/|) { $ret = $fsname }   #NFS host:/path
 	elsif($argtyp eq "dev")    { $ret = $fsname }
 	elsif($argtyp eq "qfile")  { $ret = "$path/quotas" }
 	elsif($argtyp eq "any")    { $ret = $target }
